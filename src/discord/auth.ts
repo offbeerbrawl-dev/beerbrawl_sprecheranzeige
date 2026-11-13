@@ -55,17 +55,34 @@ export async function authenticate(
 
   log("Discord fragt jetzt nach der Freigabe. Bitte in der Discord-App bestätigen.");
   try {
-    const { code } = await ipc.request(
-      "AUTHORIZE",
-      { client_id: creds.clientId, scopes: creds.scopes, redirect_uri: creds.redirectUri },
-      undefined,
-      5 * 60_000,
-    );
-    const token = await tokenRequest(creds, {
-      grant_type: "authorization_code",
-      code,
-      redirect_uri: creds.redirectUri,
-    });
+    // Discord lehnt im RPC-Ablauf eine mitgeschickte Redirect-URI ab ("cannot be
+    // used in the RPC OAuth2 Authorization flow"). Die Referenz berichtet den
+    // umgekehrten Fall ("Missing redirect_uri"), deshalb erst ohne, dann mit.
+    const base = { client_id: creds.clientId, scopes: creds.scopes };
+    let code: string;
+    try {
+      ({ code } = await ipc.request("AUTHORIZE", base, undefined, 5 * 60_000));
+    } catch (err) {
+      if (!ipc.connected || !/redirect_uri/i.test(msg(err))) throw err;
+      log(`Freigabe ohne Redirect-URI abgelehnt (${msg(err)}), versuche es mit.`);
+      ({ code } = await ipc.request(
+        "AUTHORIZE",
+        { ...base, redirect_uri: creds.redirectUri },
+        undefined,
+        5 * 60_000,
+      ));
+    }
+    let token: any;
+    try {
+      token = await tokenRequest(creds, {
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: creds.redirectUri,
+      });
+    } catch (err) {
+      log(`Token-Tausch mit Redirect-URI gescheitert (${msg(err)}), versuche es ohne.`);
+      token = await tokenRequest(creds, { grant_type: "authorization_code", code });
+    }
     writeCache(tokenFile, token, creds);
     return await ipc.request("AUTHENTICATE", { access_token: token.access_token });
   } catch (err) {

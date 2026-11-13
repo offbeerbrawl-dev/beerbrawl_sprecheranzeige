@@ -55,7 +55,7 @@ export interface Config {
 const DEFAULTS: Config = {
   port: 4747,
   channel: "auto",
-  lingerMs: 500,
+  lingerMs: 250,
   scale: 1.15,
   showGuestNames: true,
   ignore: [],

@@ -44,7 +44,7 @@ Voraussetzungen: Windows, Discord-Desktop-App, [Node.js](https://nodejs.org) ab 
 | `people` | Bekannte Personen in Anzeigereihenfolge: `name`, `discordId`, `image` (PNG in `overlay/korken`), `color`, `source` (SVG für das Korken-Skript) |
 | `ignore` | Nutzer-IDs, die nie erscheinen, zum Beispiel das BeerBrawl-Konto |
 | `channel` | `"auto"` = Kanal, in dem die Discord-App gerade sitzt, oder eine feste Kanal-ID |
-| `lingerMs` | Nachleuchten nach dem Sprechen, Standard 500 |
+| `lingerMs` | Nachleuchten nach dem Sprechen in ms, Standard 250 |
 | `scale` | Vergrößerung beim Sprechen, Standard 1.15 |
 | `showGuestNames` | Discord-Name unter Gast-Korken an oder aus |
 | `layout` | `x`, `y`, `size`, `step` (Abstand von Korken zu Korken), `max`, `nameSize`, `nameLift` |

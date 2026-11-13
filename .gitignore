@@ -1,0 +1,17 @@
+# Zugangsdaten und Token-Zwischenspeicher: nie ins Repo
+.env
+.env.*
+!.env.example
+.token-cache.json
+
+# Persönliche Konfiguration (Discord-Nutzer-IDs)
+config.json
+
+# Abhängigkeiten und Build-Ausgabe
+node_modules/
+dist/
+
+# Erzeugte Korken-Bilder (per Skript neu erzeugbar)
+overlay/korken/*.png
+
+*.log

@@ -1,0 +1,16 @@
+{
+  "_hinweis": "Ausgangsfarben der Korken-SVGs: Grundton, Schattenton und die farbigen Randtöne, die beim Umfärben mitgezogen werden. Grau, Weiß, Schwarz und das Gelb bleiben unberührt.",
+  "BeerBrawI_Kronkorken_andy.svg": { "base": "#6c9cea", "shadow": "#4779ca", "edges": ["#92b1ed"] },
+  "BeerBrawI_Kronkorken_jan.svg": { "base": "#f5b410", "shadow": "#d59d10", "edges": ["#f7d39f"] },
+  "BeerBrawI_Kronkorken_tobi.svg": { "base": "#df0559", "shadow": "#bc0e51", "edges": [] },
+  "BeerBrawI_Kronkorken_marek.svg": { "base": "#674194", "shadow": "#583483", "edges": ["#8873a7", "#a09aa9"] },
+  "BeerBrawI_Kronkorken_sven.svg": { "base": "#1fad87", "shadow": "#188c6d", "edges": ["#94cfaf", "#5ab798"] },
+  "BeerBrawI_Kronkorken_memia.svg": { "base": "#fd86a4", "shadow": "#d76b85", "edges": ["#a49a9c"] },
+  "BeerBrawI_Kronkorken_gerri.svg": { "base": "#173d0b", "shadow": "#133209", "edges": ["#9fa29f", "#5d645c"] },
+  "BeerBrawI_Kronkorken_painted.svg": {
+    "base": "#007f7f",
+    "shadow": "#006868",
+    "edges": ["#218483", "#619595", "#b6c6c6", "#ced2d2", "#9ca7a7"]
+  },
+  "BeerBrawI_Kronkorken_lauch.svg": { "base": "#4fd8f0", "shadow": "#3ca5b8", "edges": ["#a7ecf8", "#63b5c3"] }
+}

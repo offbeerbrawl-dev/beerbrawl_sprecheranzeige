@@ -1,0 +1,27 @@
+{
+  "name": "beerbrawl-sprecheranzeige",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OBS-Browserquelle: Kronkorken zeigen, wer im Discord-Sprachkanal spricht",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "start": "npm run build && node dist/src/main.js",
+    "demo": "npm run build && node dist/src/main.js --demo",
+    "probe": "npm run build && node dist/src/probe.js",
+    "who": "npm run build && node dist/src/probe.js --who",
+    "test": "npm run build && node --test dist/test/",
+    "korken": "node scripts/korken.mjs"
+  },
+  "dependencies": {
+    "@fontsource/bangers": "^5.0.0"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/node": "^20.11.0",
+    "typescript": "^5.4.0"
+  }
+}

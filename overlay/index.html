@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>BeerBrawl Sprecheranzeige</title>
+<style>
+  @font-face {
+    font-family: "Bangers";
+    src: url("/fonts/bangers.woff2") format("woff2");
+    font-display: block;
+  }
+  html, body {
+    margin: 0;
+    background: transparent;
+    overflow: hidden;
+  }
+  /* Zum Ansehen im Browser: http://127.0.0.1:4747/?hintergrund */
+  body.hintergrund { background: #2b3a4a; }
+  #stage {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+  }
+  .cork, .name {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 200ms ease, left 200ms ease;
+  }
+  .cork.in, .name.in { opacity: 1; }
+  .cork {
+    z-index: 1;
+    display: block;
+    height: auto;
+    /* Schweigen: Graustufen, leicht abgedunkelt, Normalgröße */
+    filter: grayscale(1) brightness(0.72);
+    transform: scale(1);
+    /* Vergrößerung aus der Unterkante heraus, damit die Reihe nicht springt */
+    transform-origin: 50% 100%;
+    transition: opacity 200ms ease, left 200ms ease, transform 150ms ease, filter 150ms ease;
+  }
+  .cork.on {
+    z-index: 2;
+    filter: none;
+    transform: scale(var(--scale, 1.15));
+  }
+  .name {
+    z-index: 3;
+    box-sizing: border-box;
+    padding: 0 4px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: "Bangers", Impact, sans-serif;
+    letter-spacing: 0.03em;
+    line-height: 1.15;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000, 0 0 3px #000, 0 0 3px #000;
+  }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+  if (new URLSearchParams(location.search).has("hintergrund")) document.body.classList.add("hintergrund");
+
+  const stage = document.getElementById("stage");
+  /** id -> { img, label } */
+  const shown = new Map();
+  let layout = { x: 8, y: 943, size: 145, step: 95, nameSize: 26, nameLift: 6 };
+
+  function render(corks) {
+    const ids = new Set(corks.map((c) => c.id));
+    for (const [id, el] of shown) {
+      if (ids.has(id)) continue;
+      shown.delete(id);
+      for (const node of [el.img, el.label]) {
+        node.classList.remove("in");
+        setTimeout(() => node.remove(), 220);
+      }
+    }
+
+    let guestIndex = 0;
+    corks.forEach((c, i) => {
+      let el = shown.get(c.id);
+      const left = layout.x + i * layout.step;
+      if (!el) {
+        el = { img: document.createElement("img"), label: document.createElement("div") };
+        el.img.className = "cork";
+        el.label.className = "name";
+        el.img.style.left = left + "px";
+        stage.append(el.img, el.label);
+        shown.set(c.id, el);
+        // Erst nach dem ersten Zeichnen einblenden, sonst greift der Übergang nicht.
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          if (shown.get(c.id) === el) { el.img.classList.add("in"); el.label.classList.add("in"); }
+        }));
+      }
+      const src = "/korken/" + encodeURIComponent(c.image);
+      if (el.img.getAttribute("src") !== src) el.img.src = src;
+      el.img.style.left = left + "px";
+      el.img.style.top = layout.y + "px";
+      el.img.style.width = layout.size + "px";
+      el.img.classList.toggle("on", c.speaking);
+
+      el.label.textContent = c.showName ? c.name : "";
+      el.label.style.display = c.showName ? "" : "none";
+      // Breiter als der Korken, mittig darunter: Platz bis zum übernächsten Gast.
+      const nameWidth = Math.max(layout.size, 2 * layout.step - 6);
+      el.label.style.left = Math.max(0, left + (layout.size - nameWidth) / 2) + "px";
+      el.label.style.width = nameWidth + "px";
+      el.label.style.fontSize = layout.nameSize + "px";
+      // Korken sind 400 x 390: Unterkante = y + size * 0.975. Namen benachbarter
+      // Gäste stehen abwechselnd eine Zeile höher, damit sie sich nicht überdecken.
+      const line = layout.nameSize * 1.15;
+      const stagger = c.showName && guestIndex++ % 2 === 1 ? line : 0;
+      el.label.style.top = (layout.y + layout.size * 0.975 - layout.nameLift - line - stagger) + "px";
+    });
+  }
+
+  const source = new EventSource("/events");
+  source.addEventListener("config", (e) => {
+    const cfg = JSON.parse(e.data);
+    layout = { ...layout, ...cfg.layout };
+    stage.style.setProperty("--scale", cfg.scale);
+  });
+  source.addEventListener("state", (e) => render(JSON.parse(e.data).corks));
+  // Brücke weg: leer und durchsichtig. EventSource verbindet sich von selbst neu.
+  source.addEventListener("error", () => render([]));
+</script>
+</body>
+</html>

@@ -11,7 +11,4 @@ config.json
 node_modules/
 dist/
 
-# Erzeugte Korken-Bilder (per Skript neu erzeugbar)
-overlay/korken/*.png
-
 *.log

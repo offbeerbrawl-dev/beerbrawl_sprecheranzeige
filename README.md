@@ -10,7 +10,7 @@ Ein lokaler Prozess verbindet sich über Discords lokale RPC-Schnittstelle mit d
 |---|---|
 | Zustandslogik, Server, Overlay, Demo-Modus | fertig, mit Tests und im Demo-Modus angesehen |
 | Korken-Grafiken | erzeugt und angesehen |
-| Anbindung an Discord | geschrieben und gegen eine nachgestellte Discord-App getestet, **noch nicht mit dem echten Discord** (AP1) |
+| Anbindung an Discord | läuft seit 2026-11-13 mit dem echten Discord (Anmeldung, Mitglieder, Sprech-Events mit einer Person). Der Test mit mehreren Personen steht aus. |
 
 ## Einrichtung auf einem neuen PC
 
@@ -34,8 +34,14 @@ Voraussetzungen: Windows, Discord-Desktop-App, [Node.js](https://nodejs.org) ab 
 | `npm run who` | listet alle im aktuellen Sprachkanal mit Nutzer-ID und Anzeigename |
 | `npm run probe` | Machbarkeitstest: schreibt Mitglieder und Sprech-Events ins Terminal |
 | `npm run probe -- --channel <Kanal-ID>` | dasselbe für eine feste Kanal-ID |
+| `npm start` | Normalbetrieb aus dem Terminal |
+| `npm run demo -- 10` | Demo-Modus aus dem Terminal |
 | `npm test` | Tests |
 | `npm run korken` | Korken-Bilder neu erzeugen |
+
+In PowerShell braucht die Startdatei den Aufruf-Operator: `& ".\Sprecheranzeige starten.bat" --demo 10`.
+
+`npm run probe` und `npm run who` schreiben nur ins Terminal und liefern keine Seite für OBS aus.
 
 ## Konfiguration (`config.json`)
 
@@ -77,6 +83,7 @@ Die PNGs liegen im Repo, damit ein neuer PC ohne die SVGs auskommt.
 | Meldung oder Bild | Ursache und Abhilfe |
 |---|---|
 | „Discord nicht erreichbar“ | Die Desktop-App läuft nicht. Starten, die Brücke verbindet sich innerhalb weniger Sekunden von selbst. |
+| „Token-Endpunkt antwortet 401: invalid_client“ | In der `.env` steht ein falsches Client-Secret, oft der Public Key. Im Developer Portal unter OAuth2 „Reset Secret“ und den neuen Wert eintragen. |
 | „Anmeldung bei Discord gescheitert“ | Freigabe abgelehnt, Konto kein Tester, Redirect-URI oder Scopes passen nicht. Die Meldung nennt den Fehler von Discord. Das Programm endet dann und fragt nicht in Schleife nach. |
 | Freigabe-Abfrage erscheint erneut | Der Token ist abgelaufen und ließ sich nicht erneuern, oder `.token-cache.json` fehlt. Einmal bestätigen. |
 | „Port 4747 ist belegt“ | Die Sprecheranzeige läuft schon, oder ein anderes Programm nutzt den Port. Dann `port` ändern und die URL in OBS anpassen. |
@@ -86,11 +93,17 @@ Die PNGs liegen im Repo, damit ein neuer PC ohne die SVGs auskommt.
 
 ## Offene Punkte aus dem Machbarkeitstest (AP1)
 
-Noch mit dem echten Discord zu klären, Ergebnis hier eintragen:
+Geklärt am 2026-11-13:
+
+- [x] Die Anmeldung klappt für ein Konto, das als App-Tester eingetragen ist, mit den Scopes `rpc rpc.voice.read identify`.
+- [x] `AUTHORIZE` muss **ohne** Redirect-URI geschickt werden, sonst antwortet Discord mit Fehler 5000 („Redirect URI cannot be used in the RPC OAuth2 Authorization flow“). Beim Token-Tausch wird sie mitgeschickt.
+- [x] In die `.env` gehört das Client-Secret von der Seite OAuth2 (32 Zeichen), nicht der Public Key (64 Hex-Zeichen). Mit dem falschen Wert antwortet der Token-Endpunkt mit 401 `invalid_client`.
+- [x] Mitglieder und Sprech-Events kommen für den Kanal an, in dem die Discord-App sitzt (geprüft mit einer Person).
+
+Noch zu klären, Ergebnis hier eintragen:
 
 - [ ] Start und Stopp erscheinen für zwei Personen mit richtigem Namen (`npm run probe`).
 - [ ] Ein zweiter Start kommt ohne Freigabe-Abfrage aus.
-- [ ] Reichen die Scopes `rpc rpc.voice.read identify`? Die Doku nennt keine Zuordnung von Scopes zu Befehlen.
 - [ ] Feste Kanal-ID, während der Stream-PC nicht in diesem Kanal sitzt (`npm run probe -- --channel <ID>`): Kommen Mitglieder an? Kommen Sprech-Events an? Vermutung: Mitglieder ja, Sprech-Events nein. Laut der Referenz kommen Beitritte und Abgänge auch für fremde Kanäle an, zu Sprech-Events sagt sie nichts.
 - [ ] Liefert Discord in den Mitgliedsdaten einen globalen Anzeigenamen? Die Doku zeigt nur `nick` und `username`. Der Code nimmt den Server-Spitznamen, dann den globalen Namen, dann den Kontonamen.
 
